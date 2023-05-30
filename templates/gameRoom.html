@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='gameRoom.css')}}">
+</head>
+<body>
+    <header>
+        <section class="header-section">
+          <figure>
+              <a href="{{ url_for('index') }}"><img src="{{url_for('static', filename='img/image-removebg-preview.png')}}" alt="TCC Logo"></a>
+              <figcaption>TCC</figcaption>
+              <p>Think Cloud Computing</p>
+          </figure>
+          <nav>
+              <ul>
+                  <li>About us</li>
+                  <li><a href="#ourgames">Our Games</a></li>
+                  <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
+                  {% if session['user'] %}
+                      <li><a href="{{ url_for('myProfile') }}">My Profile</a></li>
+                     <li><a>Logout</a></li>
+                     <li>{{session['user']['nickname']}}</li>
+                  {% else %}
+                      <li><a href="{{ url_for('login') }}">Login/Register</a></li>
+                  {% endif %}
+              </ul>
+          </nav>
+          </section>
+         <section class="bluerow"></section>
+    </header>
+    <main>
+        <aside class="player1">
+            <h3>nickname</h3>
+            <p>Total Score</p>
+        </aside>
+        <aside class="player2">
+            <h3>nickname</h3>
+            <p>Total Score</p>
+        </aside>
+        <section class="game-board">
+            <h3>Question:</h3>
+            <button>Option 1</button>
+            <button>Option 2</button>
+            <button>Option 3</button>
+            <button>Option 4</button>
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+  <title>Document</title>
+  <style>
+    .logInMain {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    form {
+      width: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 30px;
+      /* margin-top: 10%;  */
+    }
+
+    #loginButton {
+      transform: translateX(-30px);
+      margin-top: 20px;
+    }
+
+    #loginText {
+      transform: translateX(-30px);
+    }
+
+    .formAlter {
+      /* border: 2px solid black; */
+      position:absolute;
+      bottom:200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      /* gap: 0px; */
+      transform: translateX(-33px);
+    }
+
+    #btns {
+      margin: -70px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <section class="header-section">
+      <figure>
+          <a href="{{ url_for('index') }}"><img src="{{url_for('static', filename='img/image-removebg-preview.png')}}" alt="TCC Logo"></a>
+          <figcaption>TCC</figcaption>
+          <p>Think Cloud Computing</p>
+      </figure>
+      <nav>
+          <ul>
+              <li>About us</li>
+              <li><a href="{{ url_for('index') }} ~ {{"#ourgames"}}">Our Games</a></li>
+              <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
+              {% if session['user'] %}
+                  <section class="dropdown">
+                      <button class="dropbutton"><span class="fa fa-solid fa-user"></span>  {{session['user']['nickname']}} <span class="fa fa-solid fa-caret-down"></span></button>
+                      <section class="dropcontent">
+                          <li><a href="{{ url_for('myProfile') }}">My Profile</a></li>
+                          <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                      </section>
+                  </section>
+              {% else %}
+                  <li><a href="{{ url_for('login') }}">Login/Register</a></li>
+              {% endif %}
+          </ul>
+      </nav>
+      </section>
+     <section class="bluerow"></section>
+  </header>
+  <main class="logInMain">
+    <h1 id="loginText">Login</h1>
+    <form method="POST" action="{{ url_for('login') }}" class="needs-validation">
+      <div class="form-row">
+        <div class="col-md-10 mb-3">
+          <label for="validationCustom01">Username</label>
+          <input
+              type="text"
+              name="username"
+              class="form-control"
+              id="validationCustom01"
+              placeholder="Enter your username"
+              value=""
+              required
+            />
+        </div>
+        <div class="col-md-10 mb-3">
+          <label for="validationCustom02">Password</label>
+          <input
+              type="password"
+              name="password"
+              class="form-control"
+              id="validationCustom02"
+              placeholder="Enter your password"
+              value=""
+              required
+            />
+        </div>
+      </div>
+      <div>
+        <h1>dede</h1>
+        <button class="button" id="loginButton" type="submit">Login</button>
+      </div>
+    </form>
+
+    <div class="formAlter">
+      <h3>Not registered?</h3>
+      <div id="btns">
+        <button class="button"><a style="color:white; margin-top: 5px;" href="{{ url_for('register') }}">Register</a></button>
+        <button class="button"><a style="color:white; margin-top: 5px;" href="{{ url_for('index') }}">Go Back</a></button>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>

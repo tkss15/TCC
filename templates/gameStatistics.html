@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='statistic.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Document</title>
+</head>
+<body>
+    <header>
+      <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+        <section class="header-section">
+          <figure>
+              <a href="{{ url_for('index') }}"><img src="{{url_for('static', filename='img/image-removebg-preview.png')}}" alt="TCC Logo"></a>
+              <figcaption>TCC</figcaption>
+              <p>Think Cloud Computing</p>
+          </figure>
+          <nav>
+              <ul>
+                 <li><a href="{{ url_for('about') }}">About us</a></li>
+                  <li><a href="{{ url_for('index') }} ~ {{"#ourgames"}}">Our Games</a></li>
+                  <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
+                  {% if session['user'] %}
+                      <section class="dropdown">
+                          <button class="dropbutton"><span class="fa fa-solid fa-user"></span>  {{session['user']['nickname']}} <span class="fa fa-solid fa-caret-down"></span></button>
+                          <section class="dropcontent">
+                              <li><a href="{{ url_for('myProfile') }}">My Profile</a></li>
+                              {% if session['user']['role'] == 'admin' %}
+                              <li><a href="{{ url_for('manager') }}">Manager Dashboard</a></li>
+                          {% endif %}
+                              <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                          </section>
+                      </section>
+                  {% else %}
+                      <li><a href="{{ url_for('login') }}">Login/Register</a></li>
+                  {% endif %}
+              </ul>
+          </nav>
+          </section>
+         <section class="bluerow"></section>
+      </header>
+    <main>
+        <script src="{{ url_for('static', filename='confetti.js') }}"></script>
+        <section class="statistic">
+            <h2 class="title">Game Statsitics</h2>
+            {% if session['user_statistics']['recordBroken'] == "True" %}
+              <h4 id="newRecord">New High Score !!!</h4>
+            {% endif %}
+            <section class="graphs">
+                <article>
+                    <h3>Game Bar Graph:</h3>
+                    <canvas id="gameStatistics" width="600" height="600"></canvas>
+                </article>
+                <article>
+                    <h3>Linear Progress:</h3>
+                    <canvas id="gameStatistics2" width="600" height="600"></canvas>
+                </article>
+            </section>
+        </section>
+    </main>
+</body>
+<script>
+const canvasElement = document.getElementById('gameStatistics').getContext('2d');
+const canvasElement2 = document.getElementById('gameStatistics2').getContext('2d');
+        const data = {
+            labels: ["Wrong Anwsers", "Right Anwsers"],
+            datasets: [
+                {
+                    label:"Anwsers Overview",
+                    data:[{{10 - session['user_statistics']['answers']}},{{session['user_statistics']['answers']}}],
+                    backgroundColor:[
+                        'rgb(255,99,132)',
+                        "rgb(123, 255, 0)"
+                    ],
+                    hoverOffset: 4
+                }
+            ]
+        }
+        // Create the doughnut chart
+        let myChart = new Chart(canvasElement, {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: false
+            }
+        });
+
+    const data2 = {
+    labels: ["1","2","3","4","5","6","7","8","9","10"],
+    datasets: [{
+        label: 'Total Points',
+        data: {{session['user_statistics']['array']}},
+        fill: true,
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.1
+    }]
+    };
+    let myChart2 = new Chart(canvasElement2, {
+            type: 'line',
+            data: data2,
+            options: {
+                responsive: false,
+                scales: {
+                    y: {
+                        max: 20,
+                    }
+                }
+            }
+    });
+if ("{{session['user_statistics']['recordBroken']}}" == "True"){
+  const start = () => {
+    setTimeout(function(){
+      confetti.start();
+    },0);
+  };
+  const stop = () => {
+    setTimeout(function(){
+      confetti.stop();
+    },15000);
+  };
+
+  start();
+  stop();
+}
+</script>
+</html>

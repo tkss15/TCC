@@ -1,0 +1,71 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js"></script>
+    <script src="{{url_for('static', filename='trivia_multi.js')}}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <section class="header-section">
+          <figure>
+              <a href="{{ url_for('index') }}"><img src="{{url_for('static', filename='img/image-removebg-preview.png')}}" alt="TCC Logo"></a>
+              <figcaption>TCC</figcaption>
+              <p>Think Cloud Computing</p>
+          </figure>
+          <nav>
+              <ul>
+                  <li>About us</li>
+                  <li><a href="#ourgames">Our Games</a></li>
+                  <li><a href="{{ url_for('leaderboard') }}">Leaderboard</a></li>
+                  {% if session['user'] %}
+                      <li><a href="{{ url_for('myProfile') }}">My Profile</a></li>
+                     <li><a>Logout</a></li>
+                     <li>{{session['user']['nickname']}}</li>
+                  {% else %}
+                      <li><a href="{{ url_for('login') }}">Login/Register</a></li>
+                  {% endif %}
+              </ul>
+          </nav>
+          </section>
+         <section class="bluerow"></section>
+      </header>
+    <main>
+        <h2>Trivia Multiplayer !</h2>
+        <section>
+            {% if session['user'] %}
+            <h3>Create a Room !</h3>
+                <form id="RoomCreate" onsubmit="createRoom(event);" data-owner="{{session['user']['nickname']}}">
+                    <label for="roomname">Room Name</label>
+                    <input type="text" id="roomname" name="roomname">
+                    <p>
+                        <button>Create !</button>
+                    </p>
+                </form>
+            {% else %} 
+                <p>U must login before u continue</p>
+            {% endif %}
+        </section>
+        
+        <table id="gamesTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Room Name</th>
+                    <th>Room Owner</th>
+                    <th>Join Room</th>
+                </tr>
+            </thead>
+            <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+            </tr>
+        </table>
+    </main>
+</body>
+</html>
