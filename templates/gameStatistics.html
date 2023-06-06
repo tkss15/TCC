@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='statistic.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script defer src="{{ url_for('static', filename='statistics.js') }}"></script>
     <title>Document</title>
 </head>
 <body>
     <header>
-      <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
         <section class="header-section">
           <figure>
               <a href="{{ url_for('index') }}"><img src="{{url_for('static', filename='img/image-removebg-preview.png')}}" alt="TCC Logo"></a>
@@ -44,16 +44,22 @@
          <section class="bluerow"></section>
       </header>
     <main>
-        <script src="{{ url_for('static', filename='confetti.js') }}"></script>
         <section class="statistic">
-            <h2 class="title">Game Statsitics</h2>
-            {% if session['user_statistics']['recordBroken'] == "True" %}
-              <h4 id="newRecord">New High Score !!!</h4>
+            <h2>Game Statsitics</h2>
+            {% if date %}
+            <h2>Date: {{date}}</h2>
             {% endif %}
-            <section class="graphs">
+            <section class="graphs"
+                    data-anwsers-right="{{right_anwser}}"
+                    data-anwsers-array="{{array_anwser}}"
+            >
                 <article>
                     <h3>Game Bar Graph:</h3>
-                    <canvas id="gameStatistics" width="600" height="600"></canvas>
+                    <canvas 
+                        id="gameStatistics" 
+                        width="600" 
+                        height="600">
+                    </canvas>
                 </article>
                 <article>
                     <h3>Linear Progress:</h3>
@@ -63,68 +69,4 @@
         </section>
     </main>
 </body>
-<script>
-const canvasElement = document.getElementById('gameStatistics').getContext('2d');
-const canvasElement2 = document.getElementById('gameStatistics2').getContext('2d');
-        const data = {
-            labels: ["Wrong Anwsers", "Right Anwsers"],
-            datasets: [
-                {
-                    label:"Anwsers Overview",
-                    data:[{{10 - session['user_statistics']['answers']}},{{session['user_statistics']['answers']}}],
-                    backgroundColor:[
-                        'rgb(255,99,132)',
-                        "rgb(123, 255, 0)"
-                    ],
-                    hoverOffset: 4
-                }
-            ]
-        }
-        // Create the doughnut chart
-        let myChart = new Chart(canvasElement, {
-            type: 'doughnut',
-            data: data,
-            options: {
-                responsive: false
-            }
-        });
-
-    const data2 = {
-    labels: ["1","2","3","4","5","6","7","8","9","10"],
-    datasets: [{
-        label: 'Total Points',
-        data: {{session['user_statistics']['array']}},
-        fill: true,
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1
-    }]
-    };
-    let myChart2 = new Chart(canvasElement2, {
-            type: 'line',
-            data: data2,
-            options: {
-                responsive: false,
-                scales: {
-                    y: {
-                        max: 20,
-                    }
-                }
-            }
-    });
-if ("{{session['user_statistics']['recordBroken']}}" == "True"){
-  const start = () => {
-    setTimeout(function(){
-      confetti.start();
-    },0);
-  };
-  const stop = () => {
-    setTimeout(function(){
-      confetti.stop();
-    },15000);
-  };
-
-  start();
-  stop();
-}
-</script>
 </html>

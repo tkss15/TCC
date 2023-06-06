@@ -1,15 +1,32 @@
+import backend
+import firebase_admin
+import uuid
+import os 
 from flask_ngrok import run_with_ngrok
 from flask import Flask, jsonify, render_template, url_for, request, redirect, abort, make_response, session
-import backend
 from pyngrok import ngrok
-import os 
-import uuid
+from time import gmtime, strftime
+from firebase_admin import credentials
+from firebase_admin import db
 
 app = Flask(__name__)
 run_with_ngrok(app)
 app.secret_key = 'your_secret_key'
 
+cred = credentials.Certificate("serviceAccount.json")
+
+# Initialize the app with a service account, granting admin privileges
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://cloudclass-44ac5-default-rtdb.europe-west1.firebasedatabase.app'
+})
+
 DBConnection = backend.Database('https://cloudclass-44ac5-default-rtdb.europe-west1.firebasedatabase.app/')
+
+
+@app.after_request
+def add_header(response):
+    response.headers['ngrok-skip-browser-warning'] = '69420'
+    return response
 
 @app.route('/')
 def index():
@@ -48,34 +65,51 @@ def game_end(game):
   recordBroken = "False"
   user = session.get('user')
   game_details = request.json
-  if user is not None:
-    if int(user['highscore']) < game_details["score"]:
-       user['highscore'] = str(game_details["score"])
-       recordBroken = "True"
-       data = DBConnection.get_data('Users')
-       foundUser = [key for key in data if data[key]["username"] == user["username"]]
-       if len(foundUser) > 0:
-          DBConnection.update_data("Users", foundUser[0], user)
   session["user_statistics"] = {
     "score" : game_details["score"],
     "answers": game_details["answers"],
     "array": game_details["arrayscores"],
     "recordBroken": recordBroken
   }
-  redirect_to_main = {"url":url_for('game_statsitics')}
+  if user is not None:
+    data = DBConnection.get_data('Users')
+    foundUser = [key for key in data if data[key]["username"] == user["username"]]
+    if int(user['highscore']) < game_details["score"]:
+       user['highscore'] = str(game_details["score"])
+       recordBroken = "True"
+       if len(foundUser) > 0:
+          DBConnection.update_data("Users", foundUser[0], user)
+    SaveGame(foundUser[0]) 
+  redirect_to_main = {"url":url_for('game_current_statistics')}
   return jsonify(redirect_to_main)
 
 @app.route('/statistics')
-def game_statsitics():
-   return render_template('gameStatistics.html')
+def game_current_statistics():
+    user = session.get('user_statistics')
+    return render_template('gameStatistics.html', right_anwser=user['answers'], array_anwser=user['array'])
+
+@app.route('/statistics/<id>')
+def game_statsitics(id):
+  user = session.get('user')
+  db_users = DBConnection.get_data("Users")
+  foundUser = [key for key in db_users.keys() if db_users[key]['username']==user['username']]
+  db_games = DBConnection.get_data("Games")
+  if id in db_games[foundUser[0]]:
+    game_info = db_games[foundUser[0]][id]['game-info']
+    return render_template('gameStatistics.html', date=game_info['time'], right_anwser=game_info['right_anwsers'], array_anwser=game_info['array_anwsers'])
+  return redirect(url_for('index'))
+
 @app.route('/register')
 def register():
   return render_template('register.html')
 
 @app.route('/profile')
 def myProfile():
-    user = session.get('user')
-    return render_template('MyProfile.html', highscore=user['highscore'], nickname=user['nickname'], username=user['username'])
+  user = session.get('user')
+  db_users = DBConnection.get_data("Users")
+  foundUser = [key for key in db_users.keys() if db_users[key]['username']==user['username']]
+  db_games = DBConnection.get_data("Games")
+  return render_template('MyProfile.html', highscore=user['highscore'], nickname=user['nickname'], username=user['username'], game_info = db_games[foundUser[0]])
 
 @app.route('/profile', methods=["POST"])
 def profileChanges():
@@ -295,6 +329,17 @@ def postQuestion():
   DBConnection.update_data("questions",str(key),newQuestion)
   return redirect(url_for('manager'))
 
+def SaveGame(id_reference):
+  ref = db.reference('Games')
+  box_ref = ref.child(id_reference)  
+  box_ref.push({
+          'game-info': {
+            'time' : strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+            'score' : session["user_statistics"]['score'],
+            'right_anwsers' : session["user_statistics"]['answers'],
+            'array_anwsers' : session["user_statistics"]['array']
+          }  
+    })
 
 if __name__ == '__main__':
     app.run()
