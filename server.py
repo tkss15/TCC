@@ -23,11 +23,6 @@ firebase_admin.initialize_app(cred, {
 DBConnection = backend.Database('https://cloudclass-44ac5-default-rtdb.europe-west1.firebasedatabase.app/')
 
 
-@app.after_request
-def add_header(response):
-    response.headers['ngrok-skip-browser-warning'] = '69420'
-    return response
-
 @app.route('/')
 def index():
   r = make_response(render_template('index.html'))
@@ -46,9 +41,6 @@ def home(nickname):
         return render_template('MyProfile.html', highscore=db_users[keys]['highscore'], nickname=db_users[keys]['nickname'], username=db_users[keys]['username'])
   return redirect(url_for('index'))
 
-@app.route('/lobby')
-def gameLobby():
-   return render_template('triviamulti.html')
    
 @app.route('/play/<game>')
 def play_game(game):
