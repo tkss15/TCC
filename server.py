@@ -1,7 +1,5 @@
 import backend
 import firebase_admin
-import uuid
-import os 
 from flask_ngrok import run_with_ngrok
 from flask import Flask, jsonify, render_template, url_for, request, redirect, abort, make_response, session
 from pyngrok import ngrok
@@ -23,6 +21,7 @@ firebase_admin.initialize_app(cred, {
 DBConnection = backend.Database('https://cloudclass-44ac5-default-rtdb.europe-west1.firebasedatabase.app/')
 
 
+
 @app.route('/')
 def index():
   r = make_response(render_template('index.html'))
@@ -39,7 +38,7 @@ def home(nickname):
   for keys in db_users:
     if(db_users[keys]['nickname'] == nickname):
         return render_template('MyProfile.html', highscore=db_users[keys]['highscore'], nickname=db_users[keys]['nickname'], username=db_users[keys]['username'])
-  return redirect(url_for('index'))
+  return abort(404)
 
    
 @app.route('/play/<game>')
@@ -77,8 +76,25 @@ def game_end(game):
 
 @app.route('/statistics')
 def game_current_statistics():
-    user = session.get('user_statistics')
-    return render_template('gameStatistics.html', right_anwser=user['answers'], array_anwser=user['array'])
+    user_statistics = session.get('user_statistics')
+    user = session.get('user')
+    db_users = DBConnection.get_data("Users")
+    foundUser = [key for key in db_users.keys() if db_users[key]['username']==user['username']]
+    db_games = DBConnection.get_data("Games")
+    arraygames = []
+    if foundUser[0] in db_games.keys():
+        for games in db_games[foundUser[0]]:
+
+          game_time = db_games[foundUser[0]][games]['game-info']['time']
+          game_score = db_games[foundUser[0]][games]['game-info']['score']
+          game_dict = {
+             "time": game_time,
+             "score": game_score
+          }
+          arraygames.append(game_dict)
+        arraygames = sorted(arraygames, key=lambda t: t["time"]) 
+    
+    return render_template('gameStatistics.html',all_games=arraygames, right_anwser=user_statistics['answers'], array_anwser=user_statistics['array'])
 
 @app.route('/statistics/<id>')
 def game_statsitics(id):
@@ -88,7 +104,18 @@ def game_statsitics(id):
   db_games = DBConnection.get_data("Games")
   if id in db_games[foundUser[0]]:
     game_info = db_games[foundUser[0]][id]['game-info']
-    return render_template('gameStatistics.html', date=game_info['time'], right_anwser=game_info['right_anwsers'], array_anwser=game_info['array_anwsers'])
+    arraygames = []
+    for games in db_games[foundUser[0]]:
+
+      game_time = db_games[foundUser[0]][games]['game-info']['time']
+      game_score = db_games[foundUser[0]][games]['game-info']['score']
+      game_dict = {
+         "time": game_time,
+         "score": game_score
+      }
+      arraygames.append(game_dict)
+    arraygames = sorted(arraygames, key=lambda t: t["time"]) 
+    return render_template('gameStatistics.html',all_games=arraygames, date=game_info['time'], right_anwser=game_info['right_anwsers'], array_anwser=game_info['array_anwsers'])
   return redirect(url_for('index'))
 
 @app.route('/register')
@@ -101,7 +128,9 @@ def myProfile():
   db_users = DBConnection.get_data("Users")
   foundUser = [key for key in db_users.keys() if db_users[key]['username']==user['username']]
   db_games = DBConnection.get_data("Games")
-  return render_template('MyProfile.html', highscore=user['highscore'], nickname=user['nickname'], username=user['username'], game_info = db_games[foundUser[0]])
+  if foundUser[0] in db_games:
+    return render_template('MyProfile.html', highscore=user['highscore'], nickname=user['nickname'], username=user['username'], game_info = db_games[foundUser[0]])
+  return render_template('MyProfile.html', highscore=user['highscore'], nickname=user['nickname'], username=user['username'], game_info=None)
 
 @app.route('/profile', methods=["POST"])
 def profileChanges():
@@ -240,7 +269,7 @@ def getQuestion(qID):
   print(qArr[qNumber])
   return render_template('question.html',qArr=qArr[qNumber])
 
-@app.route('/manager/',methods=['POST'])
+@app.route('/manager/<qID>',methods=['POST'])
 def operations(qID):
   if 'user' not in session:
      return redirect(url_for('index'))
@@ -332,6 +361,9 @@ def SaveGame(id_reference):
             'array_anwsers' : session["user_statistics"]['array']
           }  
     })
-
+@app.errorhandler(404)
+def page_not_found(e):
+    # note that we set the 404 status explicitly
+    return render_template('404.html'), 404
 if __name__ == '__main__':
     app.run()

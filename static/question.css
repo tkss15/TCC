@@ -183,7 +183,7 @@ header nav ul li a:hover {
 
 .anwserSection {
   position: absolute;
-  display: flex;
+  display: none;
   flex-direction: column;
   top:50%;
   left:0;
@@ -354,7 +354,7 @@ transform: translate(-50%, -50%);
 
 .gamePad {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-evenly;
   margin: 2rem;
 }
 .popup-content button {
@@ -408,6 +408,8 @@ color:#33A0c1
 
 #left-elements{
   display: flex;
+  align-items: center;
+  justify-content: center;
   flex-direction: column;
 }
 

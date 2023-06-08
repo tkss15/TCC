@@ -89,24 +89,25 @@
             <button class="button" type="submit">Save Changes</button>
           {% endif %}
         </form>
-
-        <section class="matchistory">
-            <h2 class="title" style="margin-top: 50px;">Match History</h2>
-            {%for key in game_info%}
-                <article class="game">
-                    <section>
-                        <h3>Game Score: {{game_info[key]['game-info']['score']}}</h3>
-                        <h3>Game Correct Anwser Session: {{game_info[key]['game-info']['right_anwsers']}}</h3>
-                        <h3>Date: {{game_info[key]['game-info']['time']}}</h3>
-                    </section>
-                    <a href="{{ url_for('game_statsitics', id=key)}}">
-                        <button class="button-game">
-                            View Statistics
-                        </button>
-                    </a>
-                </article>
-            {%endfor%}
-        </section>
+        {% if game_info is not none %}
+            <section class="matchistory">
+                <h2 class="title" style="margin-top: 50px;">Match History</h2>
+                {%for key, value in game_info.items()%}
+                    <article class="game">
+                        <section>
+                            <h3>Game Score: {{value["game-info"]["score"]}}</h3>
+                            <h3>Game Correct Anwser Session: {{value["game-info"]["right_anwsers"]}}</h3>
+                            <h3>Date: {{value["game-info"]["time"]}}</h3>
+                        </section>
+                        <a href="{{ url_for('game_statsitics', id=key)}}">
+                            <button class="button-game">
+                                View Statistics
+                            </button>
+                        </a>
+                    </article>
+                {%endfor%}
+            </section>
+        {%endif%}
     </main>
 </body>
 </html>

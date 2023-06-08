@@ -3,3 +3,4 @@ flask
 uuid
 firebase
 pyngrok==4.1.1
+firebase_admin
